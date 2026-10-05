@@ -22,7 +22,7 @@ function authErr(e){
 }
 
 /* ---------- Arranque ---------- */
-window.onLangChange = ()=>{ $("langSel").value = LANG; $("pfLang").value = LANG; if(!$("v-home").classList.contains("hidden")) renderHome(); if(!$("v-wizard").classList.contains("hidden")) wzRender(); };
+window.onLangChange = ()=>{ $("langSel").value = LANG; $("pfLang").value = LANG; if(!$("v-home").classList.contains("hidden")){ renderHome(); if(typeof boardRender==="function") boardRender(); } if(!$("v-wizard").classList.contains("hidden")) wzRender(); };
 function init(){
   document.documentElement.lang = LANG; applyI18n(); $("langSel").value = LANG; $("pfLang").value = LANG;
   if(!cfgOk()){ show("login"); $("cfgMsg").style.display="block"; return; }
@@ -31,10 +31,10 @@ function init(){
   auth = firebase.auth(); db = firebase.database();
   auth.onAuthStateChanged(async u=>{
     USER = u;
-    if(!u){ PROFILE = null; show("login"); return; }
+    if(!u){ PROFILE = null; if(typeof stopBoardSync==="function") stopBoardSync(); show("login"); return; }
     await loadData();
     if(PROFILE && PROFILE.lang && I18N[PROFILE.lang]) setLang(PROFILE.lang);
-    if(!PROFILE || !PROFILE.setupDone){ wzStart(1); } else { renderHome(); show("home"); }
+    if(!PROFILE || !PROFILE.setupDone){ wzStart(1); } else { renderHome(); show("home"); startBoardSync(); }
   });
 }
 
@@ -114,7 +114,7 @@ async function skipImport(){ await finishSetup(); }
 async function finishSetup(){
   await uref("profile").update({setupDone:true});
   PROFILE = Object.assign({}, PROFILE, {setupDone:true});
-  await loadData(); renderHome(); show("home");
+  await loadData(); renderHome(); show("home"); startBoardSync();
 }
 
 /* ---------- Archivo ---------- */

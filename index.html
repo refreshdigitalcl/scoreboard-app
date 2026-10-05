@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SCOREBOARD</title>
 <link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/board.css">
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
@@ -100,6 +101,58 @@
 
   <!-- INICIO -->
   <section id="v-home" class="hidden">
+    <div class="tabs">
+      <button id="tab-board" class="on" onclick="showTab('board')" data-i18n="tab_board"></button>
+      <button id="tab-podium" onclick="showTab('podium')" data-i18n="tab_podium"></button>
+      <button id="tab-courses" onclick="showTab('courses')" data-i18n="tab_courses"></button>
+      <button id="soundBtn" class="soundbtn" style="flex:0" onclick="toggleSound()">🔊</button>
+    </div>
+    <div id="clsChips" class="chips"></div>
+
+    <div id="pane-board">
+      <div class="card">
+        <div class="toolbar">
+          <input id="bSearch" data-i18n-ph="search_student" oninput="boardRender()">
+          <select id="bSort" onchange="boardRender()">
+            <option value="total" data-i18n="sort_total"></option>
+            <option value="week" data-i18n="sort_week"></option>
+            <option value="today" data-i18n="sort_today"></option>
+            <option value="name" data-i18n="sort_name"></option>
+          </select>
+          <span class="stat-pill"><span data-i18n="stat_students"></span> <b id="statCount">0</b></span>
+          <span class="stat-pill"><span data-i18n="stat_with"></span> <b id="statWith">0</b></span>
+          <span class="stat-pill"><span data-i18n="stat_today"></span> <b id="statToday">0</b></span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="bt">
+            <thead><tr><th></th><th data-i18n="th_student"></th><th data-i18n="th_today"></th><th data-i18n="th_week"></th><th data-i18n="th_total"></th><th data-i18n="th_award"></th></tr></thead>
+            <tbody id="bRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="pane-podium" class="hidden">
+      <div class="card podium-wrap">
+        <div class="podium-title" id="podTitle">🏆</div>
+        <div class="muted" id="podSub" data-i18n="pick_class_podium"></div>
+        <div class="stage" id="stage"></div>
+        <div class="podium-actions">
+          <button class="btn btn-primary" onclick="celebrate()" data-i18n="celebrate"></button>
+          <select id="podMetric" onchange="renderPodium()">
+            <option value="total" data-i18n="rank_total"></option>
+            <option value="week" data-i18n="rank_week"></option>
+            <option value="month" data-i18n="rank_month"></option>
+          </select>
+        </div>
+        <div id="rankBox" style="text-align:left;margin-top:8px">
+          <h3 style="margin:0 0 10px;text-align:center" data-i18n="rank_full"></h3>
+          <div class="ranking-scroll"><table class="bt"><thead><tr><th></th><th data-i18n="th_student"></th><th data-i18n="pts"></th></tr></thead><tbody id="rankRows"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="pane-courses" class="hidden">
     <div class="card">
       <h2><span data-i18n="home_hello"></span>, <span id="hmName"></span> 👋</h2>
       <div class="muted small" id="hmSchool"></div>
@@ -124,11 +177,16 @@
       <div id="adMsg" class="msg"></div>
     </div>
     <p class="muted small" style="margin-top:16px" data-i18n="next_stage"></p>
+  
+    </div>
   </section>
+  <canvas id="confetti"></canvas>
 </div>
 <script src="js/firebase-config.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/importer.js"></script>
+<script src="js/sounds.js"></script>
+<script src="js/board.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
