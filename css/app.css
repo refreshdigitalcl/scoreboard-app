@@ -2,7 +2,7 @@
 *{box-sizing:border-box}html,body{min-height:100%}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--text);
  background:radial-gradient(1200px 600px at 10% -10%,#2a1f5b55,transparent),radial-gradient(900px 500px at 100% 0%,#0e7a8f33,transparent),linear-gradient(180deg,var(--bg1),var(--bg2));background-attachment:fixed}
-.wrap{max-width:860px;margin:0 auto;padding:28px 16px 60px}
+.wrap{max-width:1200px;margin:0 auto;padding:28px 16px 60px}
 .brand{display:flex;align-items:center;gap:12px;margin-bottom:22px}
 .logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#22d3ee);display:grid;place-items:center;font-size:26px}
 .brand h1{margin:0;font-size:24px;letter-spacing:.5px}.brand small{color:var(--muted)}
@@ -40,3 +40,5 @@ a.link{color:#22d3ee;cursor:pointer;text-decoration:underline;font-size:14px}
 .pick{cursor:pointer;user-select:none;position:relative}
 .pick.on{border-color:#22d3ee;background:#22d3ee18;box-shadow:0 0 0 2px #22d3ee55}
 .pick.on:after{content:"✔";position:absolute;top:8px;right:10px;color:#22d3ee}
+#v-wizard{max-width:860px;margin:0 auto}
+.rankbadge{font-size:18px}
