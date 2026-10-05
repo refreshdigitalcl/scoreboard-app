@@ -30,6 +30,8 @@ function openTool(id){
   document.querySelectorAll(".toolpane").forEach(p=>p.classList.toggle("active", p.id==="tool-"+id));
   showTab("tools");
   if(id==="draw") updateDrawStatus();
+  if(id==="calendar") renderCalendar();
+  if(id==="voice") voiceUI();
   if(id==="groups") updateGroupStatus();
   if(id==="spell") spellRenderLevels();
   if(id==="mail"){ initMailDefaults(); renderMailStudents(); }
@@ -39,7 +41,7 @@ function toggleFullscreen(){
   else document.exitFullscreen();
 }
 document.addEventListener("fullscreenchange", ()=>document.body.classList.toggle("fs-active", !!document.fullscreenElement));
-function toolsOnClassChange(){ updateDrawStatus(); updateGroupStatus(); if(typeof renderMailStudents==="function") renderMailStudents(); }
+function toolsOnClassChange(){ if(typeof renderCalendar==="function") renderCalendar(); if(typeof routinesOnClassChange==="function") routinesOnClassChange(); updateDrawStatus(); updateGroupStatus(); if(typeof renderMailStudents==="function") renderMailStudents(); }
 
 /* ----- Timer ----- */
 let timerMode="countdown", timerRunning=false, timerRemaining=0, timerElapsed=0, timerInterval=null, timerInitial=0;
@@ -103,11 +105,11 @@ function updateDrawStatus(){
   el.textContent = tf("dr_status", {c:curClass, r:remaining.length, a:all.length});
 }
 function resetDrawPool(){ if(!curClass){ alert(t("pick_class_alert")); return; } DRAWN[curClass] = []; updateDrawStatus(); }
-function startRandomDraw(){
+function startRandomDraw(forced){
   if(!curClass){ alert(t("pick_class_alert")); return; }
   const {all, remaining} = drawPool();
   if(!all.length){ alert(t("dr_none")); return; }
-  const winner = remaining[Math.floor(Math.random()*remaining.length)];
+  const winner = (forced && forced.id) ? forced : remaining[Math.floor(Math.random()*remaining.length)];
   $("drawModalBg").classList.add("show");
   $("drawClassLabel").textContent = "🎓 "+curClass;
   $("drawActions").style.display = "none";

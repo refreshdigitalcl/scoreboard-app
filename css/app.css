@@ -42,3 +42,6 @@ a.link{color:#22d3ee;cursor:pointer;text-decoration:underline;font-size:14px}
 .pick.on:after{content:"✔";position:absolute;top:8px;right:10px;color:#22d3ee}
 #v-wizard{max-width:860px;margin:0 auto}
 .rankbadge{font-size:18px}
+.set-h{margin:22px 0 10px;font-size:18px}
+#pane-settings>.set-h:first-child{margin-top:0}
+#pane-settings .card{margin-bottom:16px}

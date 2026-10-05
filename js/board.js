@@ -1,5 +1,5 @@
 /* Marcador + Podio. Datos: users/{uid}/history/{studentId}/{pushId} = {t, p, r, d(YYYY-MM-DD)} */
-let HISTORY = {}, curClass = localStorage.getItem("sb_cls") || "", curTab = "board", boardRefs = [];
+let HISTORY = {}, curClass = localStorage.getItem("sb_cls") || "", curTab = "prep", boardRefs = [];
 let SOUND_ON = localStorage.getItem("sb_sound") !== "off";
 const PALETTE = ["#a855f7","#06b6d4","#22c55e","#f97316","#ec4899","#3b82f6","#eab308","#14b8a6","#f43f5e","#8b5cf6"];
 const REASONS = [
@@ -39,24 +39,25 @@ function computeAll(){
 /* ----- Sincronización ----- */
 function startBoardSync(){
   stopBoardSync();
-  const rh = uref("history"), rs = uref("students"), rset = uref("settings");
+  const rh = uref("history"), rs = uref("students"), rset = uref("settings"), rvc = uref("voiceCmd");
+  rvc.on("value", snap=>{ if(typeof onVoiceCmd==="function") onVoiceCmd(snap.val()); });
   rset.on("value", snap=>{ SETTINGS = snap.val() || {}; settingsLoaded(); });
-  rh.on("value", snap=>{ HISTORY = snap.val() || {}; boardRender(); });
+  rh.on("value", snap=>{ HISTORY = snap.val() || {}; boardRender(); if(toolActive==="calendar" && curTab==="tools") renderCalendar(); });
   rs.on("value", snap=>{ STUDENTS = snap.val() || {}; renderHome(); boardRender(); });
-  boardRefs = [rh, rs, rset];
+  boardRefs = [rh, rs, rset, rvc];
   if(curTab==="board" && !$("v-home").classList.contains("hidden")) boardRender();
 }
-function stopBoardSync(){ boardRefs.forEach(r=>r.off()); boardRefs = []; HISTORY = {}; }
+function stopBoardSync(){ if(typeof stopVoice==="function") stopVoice(); boardRefs.forEach(r=>r.off()); boardRefs = []; HISTORY = {}; }
 
 /* ----- Navegación ----- */
 function showTab(name){
   curTab = name;
-  ["board","podium","courses","settings","tools"].forEach(n=>{
+  ["prep","board","podium","end","settings","tools"].forEach(n=>{
     $("pane-"+n).classList.toggle("hidden", n!==name);
     if($("tab-"+n)) $("tab-"+n).classList.toggle("on", n===name);
   });
   if(name!=="tools"){ document.querySelectorAll(".tool-dock button").forEach(x=>x.classList.remove("active")); }
-  $("clsChips").classList.toggle("hidden", name==="courses" || name==="settings");
+  $("clsChips").classList.toggle("hidden", name==="settings");
   boardRender();
 }
 function setClass(c){ curClass = c; localStorage.setItem("sb_cls", c); boardRender(); if(typeof toolsOnClassChange==="function") toolsOnClassChange(); }
@@ -78,6 +79,7 @@ function boardRender(){
   if(curTab==="board") renderBoardTable();
   if(curTab==="podium") renderPodium();
   if(curTab==="settings" && typeof renderSettings==="function") renderSettings();
+  if((curTab==="prep"||curTab==="end") && typeof routinesOnClassChange==="function") routinesOnClassChange();
 }
 
 /* ----- Marcador ----- */

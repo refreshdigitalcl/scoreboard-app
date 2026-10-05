@@ -8,6 +8,7 @@ const cfgOk = () => firebaseConfig && firebaseConfig.apiKey && !/PEGAR/.test(fir
 function show(view){
   ["v-login","v-wizard","v-home"].forEach(v=>$(v).classList.toggle("hidden", v!=="v-"+view));
   $("logoutBtn").classList.toggle("hidden", view==="login");
+  $("settingsBtn").classList.toggle("hidden", view!=="home");
 }
 function msg(el, text, kind){ el.textContent = text||""; el.className = "msg" + (text ? " "+(kind||"err") : ""); }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
@@ -229,4 +230,5 @@ async function addStudent(){
   }catch(e){ msg($("adMsg"), t("err_generic")); }
 }
 if(typeof setTimerMode==="function") setTimerMode("countdown");
+if(typeof buildRoutinePanes==="function") buildRoutinePanes();
 init();

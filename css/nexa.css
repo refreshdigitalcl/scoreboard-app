@@ -1,0 +1,15 @@
+.voice-card{margin-bottom:14px; border-color:#7c3aed55}
+.voice-status{display:none;align-items:center;gap:8px;font-size:12px;color:#ff5d5d;font-weight:800}
+.voice-status.active{display:flex}
+.voice-status .dot{width:9px;height:9px;border-radius:50%;background:#ff5d5d;animation:pulse .9s infinite;box-shadow:0 0 8px #ff5d5d}
+#voiceToggleBtn.voice-on{background:linear-gradient(135deg,#ff5d5d,#ffd166);color:#08081a;box-shadow:0 0 16px #ff5d5d55}
+.voice-toast{
+  position:fixed; top:16px; left:50%; transform:translateX(-50%) translateY(-24px);
+  background:linear-gradient(135deg,#22d3ee,#7c3aed); color:#08081a; font-weight:900; font-size:16px;
+  padding:14px 22px; border-radius:16px; box-shadow:0 14px 34px #0009; z-index:1200;
+  display:flex; align-items:center; gap:14px; opacity:0; pointer-events:none; transition:.25s;
+  max-width:90vw; text-align:center;
+}
+.voice-toast.show{opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto}
+.voice-toast button{background:#08081a;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-weight:800;cursor:pointer;font-size:13px;flex-shrink:0}
+.voice-toast button:hover{background:#221f45}
