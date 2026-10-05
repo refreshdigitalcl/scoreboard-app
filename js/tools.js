@@ -32,13 +32,14 @@ function openTool(id){
   if(id==="draw") updateDrawStatus();
   if(id==="groups") updateGroupStatus();
   if(id==="spell") spellRenderLevels();
+  if(id==="mail"){ initMailDefaults(); renderMailStudents(); }
 }
 function toggleFullscreen(){
   if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
   else document.exitFullscreen();
 }
 document.addEventListener("fullscreenchange", ()=>document.body.classList.toggle("fs-active", !!document.fullscreenElement));
-function toolsOnClassChange(){ updateDrawStatus(); updateGroupStatus(); }
+function toolsOnClassChange(){ updateDrawStatus(); updateGroupStatus(); if(typeof renderMailStudents==="function") renderMailStudents(); }
 
 /* ----- Timer ----- */
 let timerMode="countdown", timerRunning=false, timerRemaining=0, timerElapsed=0, timerInterval=null, timerInitial=0;

@@ -39,10 +39,11 @@ function computeAll(){
 /* ----- Sincronización ----- */
 function startBoardSync(){
   stopBoardSync();
-  const rh = uref("history"), rs = uref("students");
+  const rh = uref("history"), rs = uref("students"), rset = uref("settings");
+  rset.on("value", snap=>{ SETTINGS = snap.val() || {}; settingsLoaded(); });
   rh.on("value", snap=>{ HISTORY = snap.val() || {}; boardRender(); });
   rs.on("value", snap=>{ STUDENTS = snap.val() || {}; renderHome(); boardRender(); });
-  boardRefs = [rh, rs];
+  boardRefs = [rh, rs, rset];
   if(curTab==="board" && !$("v-home").classList.contains("hidden")) boardRender();
 }
 function stopBoardSync(){ boardRefs.forEach(r=>r.off()); boardRefs = []; HISTORY = {}; }
@@ -50,12 +51,12 @@ function stopBoardSync(){ boardRefs.forEach(r=>r.off()); boardRefs = []; HISTORY
 /* ----- Navegación ----- */
 function showTab(name){
   curTab = name;
-  ["board","podium","courses","tools"].forEach(n=>{
+  ["board","podium","courses","settings","tools"].forEach(n=>{
     $("pane-"+n).classList.toggle("hidden", n!==name);
     if($("tab-"+n)) $("tab-"+n).classList.toggle("on", n===name);
   });
   if(name!=="tools"){ document.querySelectorAll(".tool-dock button").forEach(x=>x.classList.remove("active")); }
-  $("clsChips").classList.toggle("hidden", name==="courses");
+  $("clsChips").classList.toggle("hidden", name==="courses" || name==="settings");
   boardRender();
 }
 function setClass(c){ curClass = c; localStorage.setItem("sb_cls", c); boardRender(); if(typeof toolsOnClassChange==="function") toolsOnClassChange(); }
@@ -76,6 +77,7 @@ function boardRender(){
   renderChips();
   if(curTab==="board") renderBoardTable();
   if(curTab==="podium") renderPodium();
+  if(curTab==="settings" && typeof renderSettings==="function") renderSettings();
 }
 
 /* ----- Marcador ----- */

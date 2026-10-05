@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SCOREBOARD</title>
-<link rel="stylesheet" href="css/app.css?v=4">
-<link rel="stylesheet" href="css/board.css?v=4">
-<link rel="stylesheet" href="css/tools.css?v=4">
+<link rel="stylesheet" href="css/app.css?v=5">
+<link rel="stylesheet" href="css/board.css?v=5">
+<link rel="stylesheet" href="css/tools.css?v=5">
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
@@ -106,12 +106,14 @@
       <button data-tool="timer" style="background:linear-gradient(135deg,#22c55e,#22d3ee)" onclick="openTool('timer')">⏱️<span class="td-tooltip" data-i18n="tl_timer"></span></button>
       <button data-tool="groups" style="background:linear-gradient(135deg,#22c55e,#4ade80)" onclick="openTool('groups')">👥<span class="td-tooltip" data-i18n="tl_groups"></span></button>
       <button data-tool="draw" style="background:linear-gradient(135deg,#ff5d5d,#ffd166)" onclick="openTool('draw')">🎲<span class="td-tooltip" data-i18n="tl_draw"></span></button>
+      <button data-tool="mail" style="background:linear-gradient(135deg,#3b82f6,#06b6d4)" onclick="openTool('mail')">✉️<span class="td-tooltip" data-i18n="tl_mail"></span></button>
       <button data-tool="spell" style="background:linear-gradient(135deg,#f59e0b,#ec4899)" onclick="openTool('spell')">🐝<span class="td-tooltip" data-i18n="tl_spell"></span></button>
     </div>
     <div class="tabs">
       <button id="tab-board" class="on" onclick="showTab('board')" data-i18n="tab_board"></button>
       <button id="tab-podium" onclick="showTab('podium')" data-i18n="tab_podium"></button>
       <button id="tab-courses" onclick="showTab('courses')" data-i18n="tab_courses"></button>
+      <button id="tab-settings" onclick="showTab('settings')" data-i18n="tab_settings"></button>
       <button id="soundBtn" class="soundbtn" style="flex:0" onclick="toggleSound()">🔊</button>
     </div>
     <div id="clsChips" class="chips"></div>
@@ -197,6 +199,30 @@
           <button class="tbtn tbtn-draw" onclick="startRandomDraw()" data-i18n="dr_go"></button>
         </div></div></div></div>
 
+      <div id="tool-mail" class="toolpane"><div class="card mail-card">
+        <h3 style="margin:0 0 4px" data-i18n="ml_title"></h3>
+        <p class="session-note" style="margin:0 0 12px" data-i18n="ml_help"></p>
+        <div class="mail-section-title" data-i18n="ml_s1"></div>
+        <div class="mail-grid">
+          <div class="mail-field"><label data-i18n="ml_subject"></label><input id="mailAsignatura"></div>
+          <div class="mail-field"><label data-i18n="ml_date"></label><div class="mail-date-wrap"><input type="date" id="mailFecha"><button type="button" class="mail-date-emoji" onclick="openPicker('mailFecha')">📅</button></div></div>
+          <div class="mail-field"><label data-i18n="ml_time"></label><div class="mail-date-wrap"><input type="time" id="mailHora"><button type="button" class="mail-date-emoji" onclick="openPicker('mailHora')">🕐</button></div></div>
+          <div class="mail-field"><label data-i18n="ml_duration"></label><input id="mailDuracion"></div>
+          <div class="mail-field"><label data-i18n="ml_place"></label><input id="mailLugar" data-i18n-ph="ml_place_ph"></div>
+          <div class="mail-field mail-field-wide"><label data-i18n="ml_materials"></label><input id="mailMateriales"></div>
+        </div>
+        <div class="mail-field" style="margin-top:4px"><label data-i18n="ml_contents"></label><textarea id="mailContenidos" rows="4" data-i18n-ph="ml_contents_ph"></textarea></div>
+        <div class="mail-section-title" style="margin-top:18px" data-i18n="ml_s2"></div>
+        <div class="mail-students-bar"><input id="mailSearch" data-i18n-ph="ml_search" oninput="renderMailStudents()"><span class="mail-count" id="mailCount"></span></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">
+          <button class="tbtn tbtn-ghost" onclick="mailSelectAll()" data-i18n="ml_all"></button>
+          <button class="tbtn tbtn-ghost" onclick="mailSelectNone()" data-i18n="ml_none"></button>
+        </div>
+        <div class="mail-students" id="mailStudents"></div>
+        <button class="tbtn tbtn-primary" style="margin-top:14px;width:100%" onclick="generateMailDrafts()" data-i18n="ml_generate"></button>
+        <div class="mail-results" id="mailResults"></div>
+      </div></div>
+
       <div id="tool-spell" class="toolpane"><div class="card spell-card">
         <div class="spell-top"><h3 style="margin:0" data-i18n="sp_title"></h3><div class="spell-levels" id="spellLevels"></div></div>
         <div class="spell-stage" id="spellStage">
@@ -213,6 +239,36 @@
         </div>
         <p class="session-note" id="spellCount" style="margin:8px 0 0;text-align:center"></p>
       </div></div>
+    </div>
+
+    <div id="pane-settings" class="hidden">
+      <div class="card set-card">
+        <h3 style="margin-top:0" data-i18n="set_profile"></h3>
+        <div class="set-grid">
+          <div><label data-i18n="s1_name"></label><input id="pfName2"></div>
+          <div><label data-i18n="s1_school"></label><input id="pfSchool2"></div>
+          <div><label data-i18n="s1_subject"></label><input id="pfSubject2"></div>
+        </div>
+      </div>
+      <div class="card set-card" style="margin-top:16px">
+        <h3 style="margin-top:0" data-i18n="set_mail"></h3>
+        <div class="set-grid">
+          <div><label data-i18n="set_cc"></label><input id="setCc" data-i18n-ph="set_cc_ph"></div>
+          <div><label data-i18n="set_provider"></label><select id="setProvider"><option value="gmail">Gmail</option><option value="outlook">Outlook / Microsoft 365</option><option value="mailto" data-i18n="set_mailto"></option></select></div>
+          <div><label data-i18n="set_nameorder"></label><select id="setNameOrder"><option value="lastfirst" data-i18n="set_lastfirst"></option><option value="firstlast" data-i18n="set_firstlast"></option></select></div>
+        </div>
+        <label data-i18n="set_subject"></label><input id="setSubjectTpl">
+        <label data-i18n="set_body"></label>
+        <div class="set-vars"><span data-i18n="set_vars"></span> <code>{alumno}</code> <code>{curso}</code> <code>{asignatura}</code> <code>{fecha}</code> <code>{hora}</code> <code>{duracion}</code> <code>{lugar}</code> <code>{materiales}</code> <code>{contenidos}</code> <code>{profesor}</code></div>
+        <textarea id="setBodyTpl"></textarea>
+        <div class="row" style="margin-top:14px">
+          <button class="btn btn-primary" onclick="saveSettings()" data-i18n="set_save"></button>
+          <button class="btn" onclick="previewTemplate()" data-i18n="set_preview"></button>
+          <button class="btn" onclick="resetTemplate()" data-i18n="set_reset"></button>
+        </div>
+        <div id="setMsg" class="msg"></div>
+        <div id="setPreview" class="set-preview hidden"></div>
+      </div>
     </div>
 
     <div id="pane-courses" class="hidden">
@@ -259,13 +315,14 @@
     <button class="tbtn tbtn-primary" onclick="startRandomGroups()" data-i18n="gr_again"></button>
     <button class="tbtn tbtn-ghost" onclick="closeGroupModal()" data-i18n="close"></button>
   </div></div></div>
-<script src="js/firebase-config.js?v=4"></script>
-<script src="js/i18n.js?v=4"></script>
-<script src="js/importer.js?v=4"></script>
-<script src="js/sounds.js?v=4"></script>
-<script src="js/board.js?v=4"></script>
-<script src="js/pools.js?v=4"></script>
-<script src="js/tools.js?v=4"></script>
-<script src="js/app.js?v=4"></script>
+<script src="js/firebase-config.js?v=5"></script>
+<script src="js/i18n.js?v=5"></script>
+<script src="js/importer.js?v=5"></script>
+<script src="js/sounds.js?v=5"></script>
+<script src="js/board.js?v=5"></script>
+<script src="js/pools.js?v=5"></script>
+<script src="js/tools.js?v=5"></script>
+<script src="js/mail.js?v=5"></script>
+<script src="js/app.js?v=5"></script>
 </body>
 </html>
