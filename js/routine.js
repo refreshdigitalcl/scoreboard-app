@@ -1,7 +1,7 @@
 /* Class Preparation (inicio) y End of Class (cierre): 2 pasos de 1 minuto + lista de "no listos" + punto masivo.
    Los textos están en inglés a propósito: son lo que ven y leen los estudiantes en la pantalla del aula. */
 const ROUTINES = {
-  start:{
+  prep:{
     title:"🎯 CLASS PREPARATION", steps:["📦 Materials Out","🪑 Sit &amp; Ready"],
     phases:[{label:"📦 Step 1: Get your materials ready!",secs:60},{label:"🪑 Step 2: Sit down with your materials on your desk!",secs:60}],
     done:"🔔 Class has started! Let's begin! 🎉", reason:"inicio",
