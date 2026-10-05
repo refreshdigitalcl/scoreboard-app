@@ -22,7 +22,7 @@ function authErr(e){
 }
 
 /* ---------- Arranque ---------- */
-window.onLangChange = ()=>{ $("langSel").value = LANG; $("pfLang").value = LANG; if(!$("v-home").classList.contains("hidden")){ renderHome(); if(typeof boardRender==="function") boardRender(); } if(!$("v-wizard").classList.contains("hidden")) wzRender(); };
+window.onLangChange = ()=>{ $("langSel").value = LANG; $("pfLang").value = LANG; if(!$("v-home").classList.contains("hidden")){ renderHome(); if(typeof boardRender==="function") boardRender(); if(typeof spellRenderLevels==="function") spellRenderLevels(); if(typeof toolsOnClassChange==="function") toolsOnClassChange(); } if(!$("v-wizard").classList.contains("hidden")) wzRender(); };
 function init(){
   document.documentElement.lang = LANG; applyI18n(); $("langSel").value = LANG; $("pfLang").value = LANG;
   if(!cfgOk()){ show("login"); $("cfgMsg").style.display="block"; return; }
@@ -228,4 +228,5 @@ async function addStudent(){
     renderHome(); msg($("adMsg"), t("added"), "ok");
   }catch(e){ msg($("adMsg"), t("err_generic")); }
 }
+if(typeof setTimerMode==="function") setTimerMode("countdown");
 init();

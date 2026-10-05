@@ -50,14 +50,15 @@ function stopBoardSync(){ boardRefs.forEach(r=>r.off()); boardRefs = []; HISTORY
 /* ----- Navegación ----- */
 function showTab(name){
   curTab = name;
-  ["board","podium","courses"].forEach(n=>{
+  ["board","podium","courses","tools"].forEach(n=>{
     $("pane-"+n).classList.toggle("hidden", n!==name);
-    $("tab-"+n).classList.toggle("on", n===name);
+    if($("tab-"+n)) $("tab-"+n).classList.toggle("on", n===name);
   });
+  if(name!=="tools"){ document.querySelectorAll(".tool-dock button").forEach(x=>x.classList.remove("active")); }
   $("clsChips").classList.toggle("hidden", name==="courses");
   boardRender();
 }
-function setClass(c){ curClass = c; localStorage.setItem("sb_cls", c); boardRender(); }
+function setClass(c){ curClass = c; localStorage.setItem("sb_cls", c); boardRender(); if(typeof toolsOnClassChange==="function") toolsOnClassChange(); }
 function toggleSound(){ SOUND_ON = !SOUND_ON; localStorage.setItem("sb_sound", SOUND_ON?"on":"off"); $("soundBtn").textContent = SOUND_ON ? "🔊" : "🔇"; }
 
 function renderChips(){
