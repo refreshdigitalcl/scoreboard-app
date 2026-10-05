@@ -65,6 +65,19 @@ const Importer = (function(){
     const classes = [...new Set(list.map(s=>s.cls))];
     return {list, classes, stats:{total:list.length, withEmail, noEmail, invalid, dups}};
   }
-  return {EMAIL_RE, norm, slug, clean, parseSheets, guessMapping, buildStudents};
+  /* Deja solo los cursos elegidos y recalcula las estadísticas. */
+  function filterByClasses(built, selected){
+    const sel = selected instanceof Set ? selected : new Set(selected);
+    const list = built.list.filter(s=>sel.has(s.cls));
+    let withEmail=0, noEmail=0, invalid=0;
+    list.forEach(s=>{
+      const given = s.mails.filter(Boolean);
+      if(!given.length) noEmail++;
+      else if(given.some(m=>!EMAIL_RE.test(m))) invalid++;
+      else withEmail++;
+    });
+    return {list, classes:[...new Set(list.map(s=>s.cls))], stats:{total:list.length, withEmail, noEmail, invalid, dups:0}};
+  }
+  return {EMAIL_RE, norm, slug, clean, parseSheets, guessMapping, buildStudents, filterByClasses};
 })();
 if(typeof module!=="undefined") module.exports = Importer;

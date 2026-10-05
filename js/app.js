@@ -2,7 +2,7 @@
    Datos en Firebase: users/{uid}/profile, users/{uid}/classes/{id}, users/{uid}/students/{id} */
 const $ = id => document.getElementById(id);
 let auth = null, db = null, USER = null, PROFILE = null, STUDENTS = {}, CLASSES = {};
-let wzStep = 1, PARSED = null, FILE_NAME = "", WIZ_BUILT = null;
+let wzStep = 1, PARSED = null, FILE_NAME = "", WIZ_BUILT = null, WIZ_ALL = null, PICKED = new Set();
 
 const cfgOk = () => firebaseConfig && firebaseConfig.apiKey && !/PEGAR/.test(firebaseConfig.apiKey);
 function show(view){
@@ -76,15 +76,15 @@ function wzStart(step){
     $("pfSubject").value = (PROFILE && PROFILE.subject) || "";
     $("pfLang").value = LANG;
   }
-  wzStep = step; PARSED = null; WIZ_BUILT = null; FILE_NAME = ""; $("fileInfo").textContent = ""; $("fileIn").value = "";
+  wzStep = step; PARSED = null; WIZ_BUILT = null; WIZ_ALL = null; PICKED = new Set(); FILE_NAME = ""; $("fileInfo").textContent = ""; $("fileIn").value = "";
   show("wizard"); wzRender();
 }
 function wzRender(){
-  [1,2,3,4].forEach(n=>$("s"+n).classList.toggle("hidden", n!==wzStep));
+  [1,2,3,4,5].forEach(n=>$("s"+n).classList.toggle("hidden", n!==wzStep));
   $("wzN").textContent = wzStep;
   [...$("wzSteps").children].forEach((el,i)=>el.classList.toggle("on", i<wzStep));
   $("wzBack").classList.toggle("hidden", wzStep===1 || (wzStep===2 && PROFILE && PROFILE.setupDone && false));
-  $("wzNext").textContent = wzStep===4 ? t("save") : t("next");
+  $("wzNext").textContent = wzStep===5 ? t("save") : t("next");
   $("wzNext").disabled = (wzStep===2 && !PARSED);
   msg($("wzMsg"),"");
 }
@@ -101,9 +101,14 @@ async function wzGo(dir){
   if(wzStep===2){ wzStep = 3; fillMapping(); wzRender(); onMapChange(); return; }
   if(wzStep===3){
     if(!computeBuilt()) return;
-    wzStep = 4; renderReview(); wzRender(); return;
+    wzStep = 4; PICKED = new Set(); renderClsPick(); wzRender(); return;
   }
-  if(wzStep===4) await saveCatalog();
+  if(wzStep===4){
+    if(!PICKED.size){ msg($("wzMsg"), t("err_pick")); return; }
+    WIZ_BUILT = Importer.filterByClasses(WIZ_ALL, PICKED);
+    wzStep = 5; renderReview(); wzRender(); return;
+  }
+  if(wzStep===5) await saveCatalog();
 }
 async function skipImport(){ await finishSetup(); }
 async function finishSetup(){
@@ -154,9 +159,27 @@ function currentMap(){ return {cls:$("mapCls").value, name:$("mapName").value, e
 function computeBuilt(){
   const m = currentMap(), fromSheet = $("mapSheet").checked;
   if(!m.name || (!fromSheet && !m.cls)){ msg($("wzMsg"), t("err_map_required")); return false; }
-  WIZ_BUILT = Importer.buildStudents(PARSED, m, fromSheet);
-  if(!WIZ_BUILT.list.length){ msg($("wzMsg"), t("err_no_rows")); return false; }
+  WIZ_ALL = Importer.buildStudents(PARSED, m, fromSheet);
+  WIZ_BUILT = WIZ_ALL;
+  if(!WIZ_ALL.list.length){ msg($("wzMsg"), t("err_no_rows")); return false; }
   return true;
+}
+/* ---------- Selección de cursos ---------- */
+function classCounts(){ const c = {}; WIZ_ALL.list.forEach(s=>{ c[s.cls] = (c[s.cls]||0)+1; }); return c; }
+function renderClsPick(){
+  const counts = classCounts(), q = Importer.norm($("clsSearch").value);
+  const names = Object.keys(counts).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).filter(n=>!q || Importer.norm(n).includes(q));
+  $("clsPick").innerHTML = names.map(n=>'<div class="cls pick'+(PICKED.has(n)?' on':'')+'" data-c="'+esc(n)+'"><b>'+esc(n)+'</b><span class="muted small">'+counts[n]+' '+esc(t("home_students"))+'</span></div>').join("");
+  $("clsPick").querySelectorAll(".pick").forEach(el=>el.addEventListener("click",()=>{
+    const c = el.dataset.c; if(PICKED.has(c)) PICKED.delete(c); else PICKED.add(c);
+    el.classList.toggle("on"); $("clsPicked").textContent = PICKED.size;
+  }));
+  $("clsPicked").textContent = PICKED.size;
+}
+function clsPickAll(on){
+  const q = Importer.norm($("clsSearch").value);
+  Object.keys(classCounts()).filter(n=>!q || Importer.norm(n).includes(q)).forEach(n=>{ if(on) PICKED.add(n); else PICKED.delete(n); });
+  renderClsPick();
 }
 function renderReview(){
   const s = WIZ_BUILT.stats;

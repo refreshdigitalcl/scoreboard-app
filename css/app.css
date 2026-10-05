@@ -37,3 +37,6 @@ table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}th,td{pa
 .check{display:flex;gap:8px;align-items:center;margin-top:14px;color:var(--text);font-size:14px}.check input{width:auto}
 a.link{color:#22d3ee;cursor:pointer;text-decoration:underline;font-size:14px}
 .langsel{width:auto;padding:8px 10px}
+.pick{cursor:pointer;user-select:none;position:relative}
+.pick.on{border-color:#22d3ee;background:#22d3ee18;box-shadow:0 0 0 2px #22d3ee55}
+.pick.on:after{content:"✔";position:absolute;top:8px;right:10px;color:#22d3ee}

@@ -40,8 +40,8 @@
   <!-- ASISTENTE -->
   <section id="v-wizard" class="card hidden">
     <h2 data-i18n="wiz_title"></h2>
-    <div class="muted small"><span data-i18n="step"></span> <span id="wzN">1</span> <span data-i18n="of"></span> 4</div>
-    <div class="steps" id="wzSteps"><i></i><i></i><i></i><i></i></div>
+    <div class="muted small"><span data-i18n="step"></span> <span id="wzN">1</span> <span data-i18n="of"></span> 5</div>
+    <div class="steps" id="wzSteps"><i></i><i></i><i></i><i></i><i></i></div>
 
     <div id="s1">
       <h3 data-i18n="s1_title"></h3>
@@ -73,6 +73,18 @@
     </div>
 
     <div id="s4" class="hidden">
+      <h3 data-i18n="s4c_title"></h3>
+      <p class="muted small" data-i18n="s4c_help"></p>
+      <div class="row" style="align-items:center">
+        <input id="clsSearch" data-i18n-ph="s4c_search" oninput="renderClsPick()" style="flex:2">
+        <button class="btn" onclick="clsPickAll(true)" data-i18n="s4c_all" style="flex:0 0 auto"></button>
+        <button class="btn" onclick="clsPickAll(false)" data-i18n="s4c_none" style="flex:0 0 auto"></button>
+      </div>
+      <div class="muted small" style="margin-top:10px"><b id="clsPicked">0</b> <span data-i18n="s4c_selected"></span></div>
+      <div id="clsPick" class="classes"></div>
+    </div>
+
+    <div id="s5" class="hidden">
       <h3 data-i18n="s4_title"></h3>
       <div class="stats" id="stats"></div>
       <div class="muted small" data-i18n="s4_preview"></div>
