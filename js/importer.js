@@ -99,25 +99,29 @@ const Importer = (function(){
     return sub.length===1 ? sub[0] : null;
   }
   /* backup: objeto {students:{id:{name,cls,history:[{d,t,p,r}]}}}; newStudents: {id:{name,cls}}; classMap: {viejo:nuevo} */
-  function planMigration(backup, newStudents, classMap){
-    const byCls = {};
+  function planMigration(backup, newStudents, classMap, addIds){
+    const byCls = {}, addSet = addIds instanceof Set ? addIds : new Set(addIds||[]);
     Object.keys(newStudents).forEach(id=>{ const s = newStudents[id]; (byCls[s.cls] = byCls[s.cls] || []).push({id, name:s.name}); });
-    const matches = [], unmatched = [], updates = {}; let entries = 0, points = 0;
-    Object.values(backup.students||{}).forEach(o=>{
+    const matches = [], unmatched = [], updates = {}, adds = {}; let entries = 0, points = 0;
+    Object.keys(backup.students||{}).forEach(oldId=>{
+      const o = backup.students[oldId];
       const hist = Array.isArray(o.history) ? o.history : [];
       if(!hist.length) return;
-      const target = classMap[o.cls];
-      if(!target){ unmatched.push({name:o.name, cls:o.cls, why:"class"}); return; }
-      const m = matchStudent(o.name, byCls[target]||[]);
-      if(!m){ unmatched.push({name:o.name, cls:o.cls, why:"student", pts:hist.reduce((a,h)=>a+(Number(h.p)||0),0)}); return; }
-      matches.push({oldName:o.name, newId:m.id, n:hist.length});
+      const target = classMap[o.cls], pts = hist.reduce((a,h)=>a+(Number(h.p)||0),0);
+      if(!target){ unmatched.push({oldId, name:o.name, cls:o.cls, why:"class", pts}); return; }
+      let m = matchStudent(o.name, byCls[target]||[]);
+      if(!m){
+        if(addSet.has(oldId)){ m = {id: slug(target)+"::"+slug(o.name)}; adds[m.id] = {name:clean(o.name), cls:target}; }
+        else { unmatched.push({oldId, name:o.name, cls:o.cls, why:"student", pts, target}); return; }
+      }
+      matches.push({oldName:o.name, newId:m.id, n:hist.length, added:!!adds[m.id]});
       hist.forEach((h,i)=>{
         const p = Number(h.p)||0; if(!p || !h.d) return;
         updates["history/"+m.id+"/i"+(h.t||0)+"_"+i] = {t:h.t||0, p, r:h.r||"participacion", d:h.d};
         entries++; points += p;
       });
     });
-    return {matches, unmatched, updates, entries, points};
+    return {matches, unmatched, updates, adds, entries, points};
   }
   return {EMAIL_RE, norm, slug, clean, parseSheets, guessMapping, buildStudents, filterByClasses, guessClass, matchStudent, planMigration};
 })();
