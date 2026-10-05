@@ -78,6 +78,47 @@ const Importer = (function(){
     });
     return {list, classes:[...new Set(list.map(s=>s.cls))], stats:{total:list.length, withEmail, noEmail, invalid, dups:0}};
   }
-  return {EMAIL_RE, norm, slug, clean, parseSheets, guessMapping, buildStudents, filterByClasses};
+
+  /* ---------- Migración desde el Scoreboard anterior ---------- */
+  const ckey = c => norm(c).replace(/[^a-z0-9]/g,"");
+  function guessClass(oldCls, newClasses){
+    const ok = ckey(oldCls), map = {};
+    newClasses.forEach(n=>{ map[ckey(n)] = n; });
+    if(map[ok]) return map[ok];
+    const m = /^(\d)m([a-z])$/.exec(ok);              // 1MB -> 1EMB
+    if(m && map[m[1]+"em"+m[2]]) return map[m[1]+"em"+m[2]];
+    return "";
+  }
+  const toks = s => norm(s).split(/[^a-z0-9]+/).filter(Boolean);
+  function matchStudent(oldName, cands){
+    const a = toks(oldName), aset = new Set(a);
+    const exact = cands.filter(c=>{ const b = toks(c.name); return b.length===a.length && b.every(x=>aset.has(x)); });
+    if(exact.length===1) return exact[0];
+    if(exact.length>1) return null;
+    const sub = cands.filter(c=>{ const b = toks(c.name), bset = new Set(b); return a.every(x=>bset.has(x)) || b.every(x=>aset.has(x)); });
+    return sub.length===1 ? sub[0] : null;
+  }
+  /* backup: objeto {students:{id:{name,cls,history:[{d,t,p,r}]}}}; newStudents: {id:{name,cls}}; classMap: {viejo:nuevo} */
+  function planMigration(backup, newStudents, classMap){
+    const byCls = {};
+    Object.keys(newStudents).forEach(id=>{ const s = newStudents[id]; (byCls[s.cls] = byCls[s.cls] || []).push({id, name:s.name}); });
+    const matches = [], unmatched = [], updates = {}; let entries = 0, points = 0;
+    Object.values(backup.students||{}).forEach(o=>{
+      const hist = Array.isArray(o.history) ? o.history : [];
+      if(!hist.length) return;
+      const target = classMap[o.cls];
+      if(!target){ unmatched.push({name:o.name, cls:o.cls, why:"class"}); return; }
+      const m = matchStudent(o.name, byCls[target]||[]);
+      if(!m){ unmatched.push({name:o.name, cls:o.cls, why:"student", pts:hist.reduce((a,h)=>a+(Number(h.p)||0),0)}); return; }
+      matches.push({oldName:o.name, newId:m.id, n:hist.length});
+      hist.forEach((h,i)=>{
+        const p = Number(h.p)||0; if(!p || !h.d) return;
+        updates["history/"+m.id+"/i"+(h.t||0)+"_"+i] = {t:h.t||0, p, r:h.r||"participacion", d:h.d};
+        entries++; points += p;
+      });
+    });
+    return {matches, unmatched, updates, entries, points};
+  }
+  return {EMAIL_RE, norm, slug, clean, parseSheets, guessMapping, buildStudents, filterByClasses, guessClass, matchStudent, planMigration};
 })();
 if(typeof module!=="undefined") module.exports = Importer;

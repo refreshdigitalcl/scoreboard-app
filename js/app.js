@@ -64,9 +64,9 @@ function doLogout(){ if(auth) auth.signOut(); }
 /* ---------- Datos ---------- */
 const uref = p => db.ref("users/"+USER.uid+(p?"/"+p:""));
 async function loadData(){
-  const snap = await uref().once("value");
-  const v = snap.val() || {};
-  PROFILE = v.profile || null; CLASSES = v.classes || {}; STUDENTS = v.students || {};
+  // Se leen solo estas ramas (no todo el nodo del usuario, que incluye respaldos pesados).
+  const [p,c,s] = await Promise.all(["profile","classes","students"].map(k=>uref(k).once("value")));
+  PROFILE = p.val() || null; CLASSES = c.val() || {}; STUDENTS = s.val() || {};
 }
 
 /* ---------- Asistente ---------- */

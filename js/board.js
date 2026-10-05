@@ -45,6 +45,7 @@ function startBoardSync(){
   rh.on("value", snap=>{ HISTORY = snap.val() || {}; boardRender(); if(toolActive==="calendar" && curTab==="tools") renderCalendar(); });
   rs.on("value", snap=>{ STUDENTS = snap.val() || {}; renderHome(); boardRender(); });
   boardRefs = [rh, rs, rset, rvc];
+  setTimeout(()=>{ if(USER && typeof maybeAutoBackup==="function") maybeAutoBackup(); }, 4000);
   if(curTab==="board" && !$("v-home").classList.contains("hidden")) boardRender();
 }
 function stopBoardSync(){ if(typeof stopVoice==="function") stopVoice(); boardRefs.forEach(r=>r.off()); boardRefs = []; HISTORY = {}; }
@@ -52,6 +53,7 @@ function stopBoardSync(){ if(typeof stopVoice==="function") stopVoice(); boardRe
 /* ----- Navegación ----- */
 function showTab(name){
   curTab = name;
+  if(name==="settings" && typeof bkRender==="function") bkRender();
   ["prep","board","podium","end","settings","tools"].forEach(n=>{
     $("pane-"+n).classList.toggle("hidden", n!==name);
     if($("tab-"+n)) $("tab-"+n).classList.toggle("on", n===name);
@@ -78,7 +80,7 @@ function boardRender(){
   renderChips();
   if(curTab==="board") renderBoardTable();
   if(curTab==="podium") renderPodium();
-  if(curTab==="settings" && typeof renderSettings==="function") renderSettings();
+  if(curTab==="settings" && typeof renderSettings==="function"){ renderSettings(); }
   if((curTab==="prep"||curTab==="end") && typeof routinesOnClassChange==="function") routinesOnClassChange();
 }
 
