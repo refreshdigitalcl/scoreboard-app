@@ -95,3 +95,23 @@ html,body{width:100%}
   .card{overflow:hidden}
   .tool-dock{left:50%;right:auto}
 }
+
+/* Tarjeta del marcador en celular: cuadrícula (nombre completo arriba, 3 puntajes, botones) */
+@media(max-width:760px){
+  .bt tbody tr{display:grid!important;grid-template-columns:34px 1fr 1fr 1fr;gap:8px 8px;align-items:center;padding:12px}
+  .bt tbody td:nth-child(1){grid-column:1;grid-row:1;align-self:start;padding-top:2px!important}
+  .bt tbody td:nth-child(2){grid-column:2 / -1;grid-row:1;min-width:0;flex:none}
+  .bt tbody td:nth-child(3){grid-column:2;grid-row:2}
+  .bt tbody td:nth-child(4){grid-column:3;grid-row:2}
+  .bt tbody td:nth-child(5){grid-column:4;grid-row:2}
+  .bt tbody td:nth-child(6){grid-column:1 / -1;grid-row:3}
+  .bt td[data-l]{flex:none;min-width:0}
+  .bt .sname{display:block;font-size:15px;line-height:1.25;word-break:normal;overflow-wrap:break-word;hyphens:auto}
+  .bt .tagcls{display:inline-block;margin:4px 6px 0 0;vertical-align:middle}
+  .bt .level{display:inline-block;margin:4px 0 0}
+  .actions-cell{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .actions-cell .rbtn{flex:none;width:100%;justify-content:center;padding:12px 6px;font-size:13px}
+  .actions-cell .btn-undo{grid-column:1 / -1;justify-self:end;width:auto;padding:6px 12px}
+  /* ranking del podio: nunca partir los nombres letra por letra */
+  #rankRows td.sname{word-break:normal;overflow-wrap:break-word}
+}
