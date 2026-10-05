@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SCOREBOARD</title>
+<link rel="stylesheet" href="css/app.css">
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand"><div class="logo">🏆</div><div><h1 data-i18n="app_name">SCOREBOARD</h1><small data-i18n="tagline"></small></div></div>
+    <div class="row" style="flex:0;align-items:center;flex-wrap:nowrap">
+      <select id="langSel" class="langsel" onchange="setLang(this.value)"><option value="es">Español</option><option value="en">English</option></select>
+      <button id="logoutBtn" class="btn hidden" onclick="doLogout()" data-i18n="logout"></button>
+    </div>
+  </div>
+  <div id="cfgMsg" class="msg err" data-i18n="config_missing"></div>
+
+  <!-- LOGIN -->
+  <section id="v-login" class="card hidden" style="max-width:440px;margin:0 auto">
+    <h2 data-i18n="login_title"></h2>
+    <p class="muted small" data-i18n="privacy_note"></p>
+    <button class="btn btn-google" onclick="loginGoogle()">🔐 <span data-i18n="login_google"></span></button>
+    <div class="sep" data-i18n="or"></div>
+    <label data-i18n="email"></label><input id="lgEmail" type="email" autocomplete="email">
+    <label data-i18n="password"></label><input id="lgPass" type="password" autocomplete="current-password">
+    <div class="row" style="margin-top:16px">
+      <button class="btn btn-primary" onclick="loginEmail(false)" data-i18n="sign_in"></button>
+      <button class="btn" onclick="loginEmail(true)" data-i18n="sign_up"></button>
+    </div>
+    <p style="margin:14px 0 0"><a class="link" onclick="resetPass()" data-i18n="forgot"></a></p>
+    <div id="lgMsg" class="msg"></div>
+  </section>
+
+  <!-- ASISTENTE -->
+  <section id="v-wizard" class="card hidden">
+    <h2 data-i18n="wiz_title"></h2>
+    <div class="muted small"><span data-i18n="step"></span> <span id="wzN">1</span> <span data-i18n="of"></span> 4</div>
+    <div class="steps" id="wzSteps"><i></i><i></i><i></i><i></i></div>
+
+    <div id="s1">
+      <h3 data-i18n="s1_title"></h3>
+      <label data-i18n="s1_name"></label><input id="pfName" autocomplete="name">
+      <label data-i18n="s1_school"></label><input id="pfSchool">
+      <label data-i18n="s1_subject"></label><input id="pfSubject">
+      <label data-i18n="s1_lang"></label>
+      <select id="pfLang" onchange="setLang(this.value)"><option value="es">Español</option><option value="en">English</option></select>
+    </div>
+
+    <div id="s2" class="hidden">
+      <h3 data-i18n="s2_title"></h3>
+      <p class="muted small" data-i18n="s2_help"></p>
+      <div class="drop" onclick="document.getElementById('fileIn').click()">📄<b data-i18n="s2_drop"></b></div>
+      <input id="fileIn" type="file" accept=".xlsx,.xls,.csv" class="hidden" onchange="onFile(this.files[0])">
+      <div id="fileInfo" class="fileinfo"></div>
+      <p style="margin-top:16px"><a class="link" onclick="downloadTemplate()" data-i18n="s2_template"></a></p>
+      <p><a class="link" onclick="skipImport()" data-i18n="s2_manual"></a></p>
+    </div>
+
+    <div id="s3" class="hidden">
+      <h3 data-i18n="s3_title"></h3>
+      <p class="muted small" data-i18n="s3_help"></p>
+      <label class="check"><input type="checkbox" id="mapSheet" onchange="onMapChange()"><span data-i18n="class_from_sheet"></span></label>
+      <div id="mapClsBox"><label data-i18n="col_class"></label><select id="mapCls" onchange="onMapChange()"></select></div>
+      <label data-i18n="col_name"></label><select id="mapName" onchange="onMapChange()"></select>
+      <label data-i18n="col_email1"></label><select id="mapE1" onchange="onMapChange()"></select>
+      <label data-i18n="col_email2"></label><select id="mapE2" onchange="onMapChange()"></select>
+    </div>
+
+    <div id="s4" class="hidden">
+      <h3 data-i18n="s4_title"></h3>
+      <div class="stats" id="stats"></div>
+      <div class="muted small" data-i18n="s4_preview"></div>
+      <div class="tablewrap"><table id="prevTable"></table></div>
+    </div>
+
+    <div id="wzMsg" class="msg"></div>
+    <div class="actions">
+      <button class="btn" id="wzBack" onclick="wzGo(-1)" data-i18n="back"></button>
+      <button class="btn btn-primary" id="wzNext" onclick="wzGo(1)" data-i18n="next"></button>
+    </div>
+  </section>
+
+  <!-- INICIO -->
+  <section id="v-home" class="hidden">
+    <div class="card">
+      <h2><span data-i18n="home_hello"></span>, <span id="hmName"></span> 👋</h2>
+      <div class="muted small" id="hmSchool"></div>
+      <h3 style="margin-top:20px" data-i18n="home_classes"></h3>
+      <div id="hmClasses" class="classes"></div>
+      <div id="hmEmpty" class="muted hidden" data-i18n="home_empty"></div>
+      <div class="row" style="margin-top:18px">
+        <button class="btn btn-primary" onclick="startImport()" data-i18n="home_import"></button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3 data-i18n="home_add"></h3>
+      <div class="row">
+        <div><label data-i18n="add_name"></label><input id="adName"></div>
+        <div><label data-i18n="add_class"></label><input id="adCls" list="clsList"><datalist id="clsList"></datalist></div>
+      </div>
+      <div class="row">
+        <div><label data-i18n="add_email1"></label><input id="adE1" type="email"></div>
+        <div><label data-i18n="add_email2"></label><input id="adE2" type="email"></div>
+      </div>
+      <div style="margin-top:16px"><button class="btn" onclick="addStudent()" data-i18n="add_btn"></button></div>
+      <div id="adMsg" class="msg"></div>
+    </div>
+    <p class="muted small" style="margin-top:16px" data-i18n="next_stage"></p>
+  </section>
+</div>
+<script src="js/firebase-config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/importer.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
