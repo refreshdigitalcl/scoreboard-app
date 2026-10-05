@@ -103,7 +103,7 @@ function renderBoardTable(){
     const medal = by==="name" ? (i+1) : (i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1));
     return '<tr class="'+rc+'" data-id="'+esc(s.id)+'"><td><span class="rankbadge">'+medal+'</span></td>'+
       '<td><span class="sname">'+esc(s.name)+'</span><span class="tagcls" style="background:'+clsColor(s.cls)+'">'+esc(s.cls)+'</span><span class="level">'+lv.emoji+' '+esc(t(lv.key))+'</span></td>'+
-      '<td class="c-today">'+p.today+'</td><td>'+p.week+'</td><td class="total">'+p.total+'</td>'+
+      '<td class="c-today" data-l="'+esc(t("th_today"))+'">'+p.today+'</td><td data-l="'+esc(t("th_week"))+'">'+p.week+'</td><td class="total" data-l="'+esc(t("th_total"))+'">'+p.total+'</td>'+
       '<td><div class="actions-cell">'+REASONS.map(r=>'<button class="rbtn" style="background:linear-gradient(135deg,'+r.c1+','+r.c2+')" data-id="'+esc(s.id)+'" data-r="'+r.code+'"><b>+2</b> '+r.emoji+' '+esc(t(r.key))+'</button>').join("")+
       '<button class="rbtn btn-undo" data-undo="'+esc(s.id)+'">⟲ '+esc(t("undo"))+'</button></div></td></tr>';
   }).join("") || '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">'+esc(t("no_students"))+'</td></tr>';

@@ -32,7 +32,7 @@ function init(){
   auth = firebase.auth(); db = firebase.database();
   auth.onAuthStateChanged(async u=>{
     USER = u;
-    if(!u){ PROFILE = null; if(typeof stopBoardSync==="function") stopBoardSync(); show("login"); return; }
+    if(!u){ PROFILE = null; applyLogo(); if(typeof stopBoardSync==="function") stopBoardSync(); show("login"); return; }
     await loadData();
     if(PROFILE && PROFILE.lang && I18N[PROFILE.lang]) setLang(PROFILE.lang);
     if(!PROFILE || !PROFILE.setupDone){ wzStart(1); } else { renderHome(); show("home"); startBoardSync(); }
@@ -67,6 +67,7 @@ async function loadData(){
   // Se leen solo estas ramas (no todo el nodo del usuario, que incluye respaldos pesados).
   const [p,c,s] = await Promise.all(["profile","classes","students"].map(k=>uref(k).once("value")));
   PROFILE = p.val() || null; CLASSES = c.val() || {}; STUDENTS = s.val() || {};
+  applyLogo();
 }
 
 /* ---------- Asistente ---------- */
@@ -232,3 +233,41 @@ async function addStudent(){
 if(typeof setTimerMode==="function") setTimerMode("countdown");
 if(typeof buildRoutinePanes==="function") buildRoutinePanes();
 init();
+applyLogo();
+
+/* ---------- Logo del colegio (se guarda reducido en profile.logo y se muestra en el encabezado) ---------- */
+function applyLogo(){
+  const l = (PROFILE && PROFILE.logo) || "";
+  try{ if(l) localStorage.setItem("sb_logo", l); else if(PROFILE) localStorage.removeItem("sb_logo"); }catch(e){}
+  const src = l || (!PROFILE ? (localStorage.getItem("sb_logo")||"") : "");
+  const el = $("brandLogo"); if(!el) return;
+  if(src){ el.innerHTML = '<img alt="" src="'+src.replace(/"/g,"")+'">'; el.classList.add("has"); } else { el.textContent = "🏆"; el.classList.remove("has"); }
+  const pv = $("logoPrev"); if(pv){ if(l){ pv.innerHTML = '<img alt="" src="'+l.replace(/"/g,"")+'">'; } else pv.textContent = "🏫"; }
+  const rm = $("logoRemove"); if(rm) rm.classList.toggle("hidden", !l);
+}
+function logoPick(file){
+  if(!file) return;
+  if(!/^image\//.test(file.type)){ msg($("logoMsg"), t("lg_bad")); return; }
+  const rd = new FileReader();
+  rd.onload = ev=>{
+    const img = new Image();
+    img.onload = async ()=>{
+      const max = 256, k = Math.min(1, max/Math.max(img.width, img.height));
+      const c = document.createElement("canvas"); c.width = Math.max(1,Math.round(img.width*k)); c.height = Math.max(1,Math.round(img.height*k));
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      let data = c.toDataURL("image/png");
+      if(data.length > 150000) data = c.toDataURL("image/jpeg", 0.85);
+      try{
+        await uref("profile").update({logo:data}); PROFILE = Object.assign({}, PROFILE, {logo:data}); applyLogo();
+        msg($("logoMsg"), t("lg_saved"), "ok");
+      }catch(e){ console.error(e); msg($("logoMsg"), t("err_generic")); }
+    };
+    img.onerror = ()=>msg($("logoMsg"), t("lg_bad"));
+    img.src = ev.target.result;
+  };
+  rd.readAsDataURL(file);
+}
+async function logoRemove(){
+  try{ await uref("profile/logo").remove(); const p = Object.assign({}, PROFILE); delete p.logo; PROFILE = p; applyLogo(); msg($("logoMsg"), t("lg_removed"), "ok"); }
+  catch(e){ msg($("logoMsg"), t("err_generic")); }
+}

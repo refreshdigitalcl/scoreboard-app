@@ -1,0 +1,97 @@
+/* Rigidez: solo scroll vertical, sin desplazamiento lateral */
+html,body{max-width:100%;overflow-x:hidden;overscroll-behavior-x:none}
+body{touch-action:pan-y pinch-zoom;-webkit-text-size-adjust:100%}
+.wrap{overflow-x:hidden}
+img,canvas,table,select,input,textarea{max-width:100%}
+
+@media(max-width:760px){
+  .wrap{padding:12px 10px calc(86px + env(safe-area-inset-bottom))}
+  .topbar{margin-bottom:12px}
+  .brand{gap:10px;margin-bottom:0}
+  .logo{width:40px;height:40px;font-size:22px;border-radius:12px}
+  .brand h1{font-size:19px}.brand small{display:none}
+  .topbar>.row{width:100%;justify-content:flex-end;flex-wrap:wrap!important;gap:6px}
+  .langsel{padding:8px;font-size:13px}
+  .btn{padding:9px 12px;font-size:13px}
+  .card{padding:14px;border-radius:16px}
+  h2{font-size:20px}
+
+  /* pestañas en cuadrícula 2 x 2 */
+  .tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+  .tabs button{min-width:0;padding:11px 8px;font-size:13px;border-radius:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tabs button.soundbtn{grid-column:1 / -1;flex:none;padding:8px}
+  .chips{gap:6px;margin-bottom:12px}.chip{padding:7px 12px;font-size:12px}
+
+  /* Marcador: cada estudiante es una tarjeta */
+  .toolbar{gap:8px}.toolbar input,.toolbar select{width:100%;min-width:0;flex:1 1 100%}
+  .stat-pill{font-size:11px;padding:6px 9px}
+  .bt{border-spacing:0 10px}
+  .bt thead{display:none}
+  .bt tbody tr{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:12px;border-radius:14px}
+  .bt tbody td{padding:0!important;border-radius:0!important;display:block}
+  .bt tbody td:nth-child(1){flex:0 0 auto}
+  .bt tbody td:nth-child(2){flex:1 1 0;min-width:0}
+  .bt tbody td:nth-child(3){display:block!important}
+  .bt td[data-l]{flex:1 1 30%;text-align:center;background:#0f0d24;border-radius:10px!important;padding:6px 4px!important;font-size:15px}
+  .bt td[data-l]::before{content:attr(data-l);display:block;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  .bt tbody td:last-child{flex:1 1 100%}
+  .actions-cell{flex-direction:row;flex-wrap:wrap;min-width:0;gap:6px}
+  .actions-cell .rbtn{flex:1 1 40%;justify-content:center;padding:10px 8px;font-size:12.5px}
+  .actions-cell .btn-undo{flex:0 0 auto;align-self:center}
+  .sname{word-break:break-word}
+  /* tabla del ranking del podio (3 columnas) se mantiene simple */
+  #rankRows tr{display:table-row!important;padding:0}
+  #rankRows td{display:table-cell!important}
+
+  /* Podio */
+  .stage{gap:4px;max-width:100%}
+  .pod-avatar{width:46px;height:46px;font-size:15px}
+  .pod-4 .pod-avatar,.pod-5 .pod-avatar{width:38px;height:38px;font-size:13px}
+  .pod-name,.pod-4 .pod-name,.pod-5 .pod-name{font-size:10px;max-width:70px;word-break:break-word}
+  .pod-pts{font-size:10px}
+  .pod-block{font-size:20px}
+  .pod-1 .pod-block{height:110px}.pod-2 .pod-block{height:82px}.pod-3 .pod-block{height:62px}.pod-4 .pod-block{height:46px}.pod-5 .pod-block{height:36px}
+  .podium-actions select{width:100%}
+
+  /* Herramientas */
+  .tool-dock{max-width:calc(100vw - 16px);gap:5px;padding:6px;bottom:calc(10px + env(safe-area-inset-bottom));border-radius:18px;overflow:hidden}
+  .tool-dock button{width:38px;height:38px;font-size:18px;border-radius:12px}
+  .tool-dock button .td-tooltip{display:none}
+  .timer-display{font-size:min(22vw,110px)}
+  .stepper-btn{width:56px;height:56px;font-size:28px}
+  .timer-controls{gap:6px;justify-content:center}.timer-controls .tbtn{padding:10px 12px;font-size:13px}
+  .spell-word{font-size:min(15vw,70px)}
+  .spell-stage{min-height:220px}
+  .spell-lv{padding:7px 10px;font-size:12px}
+  .draw-card-row{flex-direction:column;align-items:stretch}
+  .group-size-picker{flex-wrap:wrap}
+  .modal{padding:14px;max-height:88vh}
+  .mail-grid{grid-template-columns:1fr 1fr}.mail-field-wide{grid-column:1 / -1}
+  .mail-result-item{flex-direction:column;align-items:stretch}
+  .calgrid{gap:3px}.daycell{font-size:11px;border-radius:7px}
+  .start-title{font-size:20px}
+  .step-circle{width:38px;height:38px}
+  .set-grid{grid-template-columns:1fr}
+  .set-card textarea{min-height:220px}
+  .logo-row{gap:12px}
+}
+@media(max-width:380px){
+  .tool-dock button{width:34px;height:34px;font-size:16px}
+  .tabs button{font-size:12px}
+}
+
+/* Refuerzo: nada puede ser más ancho que la pantalla */
+html,body{width:100%}
+.wrap,.card,.tabs,.chips,.topbar,#v-home,section{width:100%;min-width:0;box-sizing:border-box}
+.row>*{min-width:0}
+@media(max-width:760px){
+  .topbar{flex-direction:column;align-items:stretch}
+  .topbar>.row{display:flex;flex-wrap:wrap!important;width:100%;gap:6px;justify-content:stretch}
+  .topbar>.row>*{flex:1 1 auto!important;min-width:0!important;width:auto}
+  .topbar>.row .langsel{flex:0 0 auto!important}
+  .brand{width:100%}
+  .chips{flex-wrap:wrap}
+  .toolbar>*{min-width:0!important}
+  .card{overflow:hidden}
+  .tool-dock{left:50%;right:auto}
+}
