@@ -115,3 +115,8 @@ html,body{width:100%}
   /* ranking del podio: nunca partir los nombres letra por letra */
   #rankRows td.sname{word-break:normal;overflow-wrap:break-word}
 }
+@media(max-width:760px){
+  .btn-undo .ul{display:none}
+  .btn-undo .ui{font-size:18px;line-height:1}
+  .actions-cell .btn-undo{width:44px;height:36px;padding:0;justify-content:center;border-radius:12px}
+}

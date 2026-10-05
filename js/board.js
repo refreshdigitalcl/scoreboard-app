@@ -105,7 +105,7 @@ function renderBoardTable(){
       '<td><span class="sname">'+esc(s.name)+'</span><span class="tagcls" style="background:'+clsColor(s.cls)+'">'+esc(s.cls)+'</span><span class="level">'+lv.emoji+' '+esc(t(lv.key))+'</span></td>'+
       '<td class="c-today" data-l="'+esc(t("th_today"))+'">'+p.today+'</td><td data-l="'+esc(t("th_week"))+'">'+p.week+'</td><td class="total" data-l="'+esc(t("th_total"))+'">'+p.total+'</td>'+
       '<td><div class="actions-cell">'+REASONS.map(r=>'<button class="rbtn" style="background:linear-gradient(135deg,'+r.c1+','+r.c2+')" data-id="'+esc(s.id)+'" data-r="'+r.code+'"><b>+2</b> '+r.emoji+' '+esc(t(r.key))+'</button>').join("")+
-      '<button class="rbtn btn-undo" data-undo="'+esc(s.id)+'">⟲ '+esc(t("undo"))+'</button></div></td></tr>';
+      '<button class="rbtn btn-undo" data-undo="'+esc(s.id)+'" title="'+esc(t("undo"))+'" aria-label="'+esc(t("undo"))+'"><span class="ui">⟲</span><span class="ul"> '+esc(t("undo"))+'</span></button></div></td></tr>';
   }).join("") || '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">'+esc(t("no_students"))+'</td></tr>';
   $("bRows").querySelectorAll("[data-r]").forEach(b=>b.addEventListener("click",ev=>addPoint(b.dataset.id,2,ev,b.dataset.r)));
   $("bRows").querySelectorAll("[data-undo]").forEach(b=>b.addEventListener("click",()=>undoLast(b.dataset.undo)));
