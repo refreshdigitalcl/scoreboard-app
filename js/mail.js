@@ -2,7 +2,7 @@
    Los correos de los apoderados están en STUDENTS[id].email1 / email2. */
 let SETTINGS = {}, MAIL_SELECTED = new Set();
 function getSettings(){
-  return Object.assign({cc:"", nameOrder:"lastfirst", provider:"gmail", subjectTpl:t("tpl_subject_default"), bodyTpl:t("tpl_body_default")}, SETTINGS);
+  return Object.assign({cc:"", nameOrder:"lastfirst", provider:"gmail", subjectTpl:t("tpl_subject_default"), bodyTpl:t("tpl_body_default"), rpSubjectTpl:t("rp_tpl_subject"), rpBodyTpl:t("rp_tpl_body")}, SETTINGS);
 }
 function settingsLoaded(){ renderSettings(); }
 
@@ -23,7 +23,7 @@ function formatFecha(val){
   const txt = d.toLocaleDateString(LANG==="en"?"en-US":"es-CL",{weekday:"long",day:"numeric",month:"long"}).replace(",","");
   return txt.charAt(0).toUpperCase()+txt.slice(1);
 }
-function fillTemplate(tpl, vars){ return String(tpl).replace(/\{([a-z]+)\}/g,(m,k)=>k in vars ? vars[k] : m); }
+function fillTemplate(tpl, vars){ return String(tpl).replace(/\{([a-z_]+)\}/g,(m,k)=>k in vars ? vars[k] : m); }
 function buildEmail(student, o){
   const S = getSettings(), name = shortStudentName(student.name, S.nameOrder);
   const vars = Object.assign({alumno:name, curso:courseLabel(student.cls), profesor:(PROFILE&&PROFILE.name)||""}, o);
@@ -102,8 +102,8 @@ async function saveSettings(){
   const data = {cc:parseCc($("setCc").value).join(", "), provider:$("setProvider").value, nameOrder:$("setNameOrder").value, subjectTpl:$("setSubjectTpl").value, bodyTpl:$("setBodyTpl").value};
   const prof = {name:$("pfName2").value.trim(), school:$("pfSchool2").value.trim(), subject:$("pfSubject2").value.trim()};
   try{
-    await uref("settings").set(data); await uref("profile").update(prof);
-    PROFILE = Object.assign({}, PROFILE, prof); SETTINGS = data;
+    await uref("settings").update(data); await uref("profile").update(prof);
+    PROFILE = Object.assign({}, PROFILE, prof); SETTINGS = Object.assign({}, SETTINGS, data);
     msg($("setMsg"), t("set_saved"), "ok"); renderHome();
   }catch(e){ console.error(e); msg($("setMsg"), t("err_generic")); }
 }

@@ -35,13 +35,14 @@ function openTool(id){
   if(id==="groups") updateGroupStatus();
   if(id==="spell") spellRenderLevels();
   if(id==="mail"){ initMailDefaults(); renderMailStudents(); }
+  if(id==="report"){ rpInit(); renderReport(); }
 }
 function toggleFullscreen(){
   if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
   else document.exitFullscreen();
 }
 document.addEventListener("fullscreenchange", ()=>document.body.classList.toggle("fs-active", !!document.fullscreenElement));
-function toolsOnClassChange(){ if(typeof renderCalendar==="function") renderCalendar(); if(typeof routinesOnClassChange==="function") routinesOnClassChange(); updateDrawStatus(); updateGroupStatus(); if(typeof renderMailStudents==="function") renderMailStudents(); }
+function toolsOnClassChange(){ if(typeof renderCalendar==="function") renderCalendar(); if(typeof routinesOnClassChange==="function") routinesOnClassChange(); updateDrawStatus(); updateGroupStatus(); if(typeof renderMailStudents==="function") renderMailStudents(); if(typeof renderReport==="function" && toolActive==="report") renderReport(); }
 
 /* ----- Timer ----- */
 let timerMode="countdown", timerRunning=false, timerRemaining=0, timerElapsed=0, timerInterval=null, timerInitial=0;

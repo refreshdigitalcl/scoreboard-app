@@ -45,7 +45,7 @@ function startBoardSync(){
   const rh = uref("history"), rs = uref("students"), rset = uref("settings"), rvc = uref("voiceCmd");
   rvc.on("value", snap=>{ if(typeof onVoiceCmd==="function") onVoiceCmd(snap.val()); });
   rset.on("value", snap=>{ SETTINGS = snap.val() || {}; settingsLoaded(); });
-  rh.on("value", snap=>{ HISTORY = snap.val() || {}; boardRender(); if(toolActive==="calendar" && curTab==="tools") renderCalendar(); });
+  rh.on("value", snap=>{ HISTORY = snap.val() || {}; boardRender(); if(toolActive==="calendar" && curTab==="tools") renderCalendar(); if(toolActive==="report" && curTab==="tools" && typeof renderReport==="function") renderReport(); });
   rs.on("value", snap=>{ STUDENTS = snap.val() || {}; renderHome(); boardRender(); });
   boardRefs = [rh, rs, rset, rvc];
   setTimeout(()=>{ if(USER && typeof maybeAutoBackup==="function") maybeAutoBackup(); }, 4000);
