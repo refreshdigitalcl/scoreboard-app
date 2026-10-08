@@ -119,3 +119,12 @@ function previewTemplate(){
   SETTINGS = prev;
   $("setPreview").textContent = t("set_subject")+": "+m.subject+"\n\n"+m.body; $("setPreview").classList.remove("hidden");
 }
+
+function loadPreset(k){
+  if(!k) return;
+  if(!confirm(t("set_reset_confirm"))){ $("setPreset").value = ""; return; }
+  $("setSubjectTpl").value = k==="reg" ? t("tpl_sj_subject") : t("tpl_subject_default");
+  $("setBodyTpl").value = k==="reg" ? t("tpl_sj_body") : t("tpl_body_default");
+  $("setPreset").value = "";
+  msg($("setMsg"), t("pr_loaded"), "ok");
+}

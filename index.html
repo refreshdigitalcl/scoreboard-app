@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SCOREBOARD</title>
-<link rel="stylesheet" href="css/app.css?v=15">
-<link rel="stylesheet" href="css/board.css?v=15">
-<link rel="stylesheet" href="css/tools.css?v=15">
-<link rel="stylesheet" href="css/routine.css?v=15">
-<link rel="stylesheet" href="css/calendar.css?v=15">
-<link rel="stylesheet" href="css/nexa.css?v=15">
-<link rel="stylesheet" href="css/mobile.css?v=15">
+<link rel="stylesheet" href="css/app.css?v=18">
+<link rel="stylesheet" href="css/board.css?v=18">
+<link rel="stylesheet" href="css/tools.css?v=18">
+<link rel="stylesheet" href="css/routine.css?v=18">
+<link rel="stylesheet" href="css/calendar.css?v=18">
+<link rel="stylesheet" href="css/nexa.css?v=18">
+<link rel="stylesheet" href="css/mobile.css?v=18">
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
@@ -22,6 +22,7 @@
     <div class="brand"><div class="logo" id="brandLogo">🏆</div><div><h1 data-i18n="app_name">SCOREBOARD</h1><small data-i18n="tagline"></small></div></div>
     <div class="row topctl" style="flex:0;align-items:center;flex-wrap:nowrap">
       <select id="langSel" class="langsel" onchange="setLang(this.value)"><option value="es">Español</option><option value="en">English</option></select>
+      <button id="helpBtn" class="btn hidden" onclick="showWelcome()" title="?" data-i18n="wl_btn"></button>
       <button id="settingsBtn" class="btn hidden" onclick="showTab('settings')" data-i18n="tab_settings"></button>
       <button id="logoutBtn" class="btn hidden" onclick="doLogout()" data-i18n="logout"></button>
     </div>
@@ -155,14 +156,20 @@
       <div class="card podium-wrap">
         <div class="podium-title" id="podTitle">🏆</div>
         <div class="muted" id="podSub" data-i18n="pick_class_podium"></div>
-        <div class="stage" id="stage"></div>
-        <div class="podium-actions">
-          <button class="btn btn-primary" onclick="celebrate()" data-i18n="celebrate"></button>
-          <select id="podMetric" onchange="renderPodium()">
-            <option value="total" data-i18n="rank_total"></option>
-            <option value="week" data-i18n="rank_week"></option>
-            <option value="month" data-i18n="rank_month"></option>
-          </select>
+        <div id="podBody">
+          <div class="pod-tabs" id="podTabs"></div>
+          <div class="pod-nav">
+            <button class="pod-arrow" onclick="podMove(-1)" aria-label="‹">‹</button>
+            <div class="pod-heading" id="podHead"></div>
+            <button class="pod-arrow" onclick="podMove(1)" aria-label="›">›</button>
+          </div>
+          <div class="pod-carousel" id="podCar"></div>
+          <div class="pod-dots" id="podDots"></div>
+          <div class="muted pod-hint" data-i18n="pod_swipe"></div>
+          <div class="podium-actions">
+            <button class="btn btn-primary" onclick="celebrate()" data-i18n="celebrate"></button>
+            <button class="btn" id="podAutoBtn" onclick="podToggleAuto()"></button>
+          </div>
         </div>
         <div id="rankBox" style="text-align:left;margin-top:8px">
           <h3 style="margin:0 0 10px;text-align:center" data-i18n="rank_full"></h3>
@@ -273,6 +280,7 @@
       <div class="muted small" id="hmSchool"></div>
       <h3 style="margin-top:20px" data-i18n="home_classes"></h3>
       <div id="hmClasses" class="classes"></div>
+      <div id="rosterPanel"></div>
       <div id="hmEmpty" class="muted hidden" data-i18n="home_empty"></div>
       <div class="row" style="margin-top:18px">
         <button class="btn btn-primary" onclick="startImport()" data-i18n="home_import"></button>
@@ -342,6 +350,7 @@
           <div><label data-i18n="set_provider"></label><select id="setProvider"><option value="gmail">Gmail</option><option value="outlook">Outlook / Microsoft 365</option><option value="mailto" data-i18n="set_mailto"></option></select></div>
           <div><label data-i18n="set_nameorder"></label><select id="setNameOrder"><option value="lastfirst" data-i18n="set_lastfirst"></option><option value="firstlast" data-i18n="set_firstlast"></option></select></div>
         </div>
+        <label data-i18n="pr_label"></label><select id="setPreset" onchange="loadPreset(this.value)"><option value="" data-i18n="pr_pick"></option><option value="generic" data-i18n="pr_generic"></option><option value="reg" data-i18n="pr_reg"></option></select>
         <label data-i18n="set_subject"></label><input id="setSubjectTpl">
         <label data-i18n="set_body"></label>
         <div class="set-vars"><span data-i18n="set_vars"></span> <code>{alumno}</code> <code>{curso}</code> <code>{asignatura}</code> <code>{fecha}</code> <code>{hora}</code> <code>{duracion}</code> <code>{lugar}</code> <code>{materiales}</code> <code>{contenidos}</code> <code>{profesor}</code></div>
@@ -359,6 +368,19 @@
   </section>
   <canvas id="confetti"></canvas>
 </div>
+<div class="modal-bg" id="editModalBg"><div class="modal">
+  <button class="modal-close" onclick="rosterCloseEdit()">✕</button>
+  <h3 data-i18n="rs_edit_title"></h3>
+  <label data-i18n="add_name"></label><input id="edName">
+  <label data-i18n="add_email1"></label><input id="edE1" type="email">
+  <label data-i18n="add_email2"></label><input id="edE2" type="email">
+  <div class="row" style="margin-top:16px"><button class="btn btn-primary" onclick="rosterSave()" data-i18n="set_save"></button><button class="btn" onclick="rosterCloseEdit()" data-i18n="rs_cancel"></button></div>
+  <div id="edMsg" class="msg"></div></div></div>
+<div class="modal-bg" id="welcomeModalBg"><div class="modal welcome-modal">
+  <button class="modal-close" onclick="closeWelcome()">✕</button>
+  <div class="wl-head"><div class="wl-logo">🏆</div><div><h3 style="margin:0" data-i18n="wl_title"></h3><div class="muted small" data-i18n="wl_sub"></div></div></div>
+  <div id="welcomeBody" class="wl-grid"></div>
+  <div style="margin-top:16px;text-align:right"><button class="btn btn-primary" onclick="closeWelcome()" data-i18n="wl_ok"></button></div></div></div>
 <div class="modal-bg" id="dayModalBg"><div class="modal">
   <button class="modal-close" onclick="closeDay()">✕</button>
   <h3 id="dayTitle"></h3><div id="dayBody"></div></div></div>
@@ -376,21 +398,23 @@
     <button class="tbtn tbtn-primary" onclick="startRandomGroups()" data-i18n="gr_again"></button>
     <button class="tbtn tbtn-ghost" onclick="closeGroupModal()" data-i18n="close"></button>
   </div></div></div>
-<script src="js/firebase-config.js?v=15"></script>
-<script src="js/i18n.js?v=15"></script>
-<script src="js/importer.js?v=15"></script>
-<script src="js/sounds.js?v=15"></script>
-<script src="js/board.js?v=15"></script>
-<script src="js/pools.js?v=15"></script>
-<script src="js/tools.js?v=15"></script>
-<script src="js/mail.js?v=15"></script>
-<script src="js/routine.js?v=15"></script>
-<script src="js/facts.js?v=15"></script>
-<script src="js/calendar.js?v=15"></script>
-<script src="js/sounds_nexa.js?v=15"></script>
-<script src="js/nexa.js?v=15"></script>
-<script src="js/migrate.js?v=15"></script>
-<script src="js/backup.js?v=15"></script>
-<script src="js/app.js?v=15"></script>
+<script src="js/firebase-config.js?v=18"></script>
+<script src="js/i18n.js?v=18"></script>
+<script src="js/importer.js?v=18"></script>
+<script src="js/sounds.js?v=18"></script>
+<script src="js/board.js?v=18"></script>
+<script src="js/pools.js?v=18"></script>
+<script src="js/tools.js?v=18"></script>
+<script src="js/mail.js?v=18"></script>
+<script src="js/routine.js?v=18"></script>
+<script src="js/facts.js?v=18"></script>
+<script src="js/calendar.js?v=18"></script>
+<script src="js/sounds_nexa.js?v=18"></script>
+<script src="js/nexa.js?v=18"></script>
+<script src="js/migrate.js?v=18"></script>
+<script src="js/backup.js?v=18"></script>
+<script src="js/roster.js?v=18"></script>
+<script src="js/welcome.js?v=18"></script>
+<script src="js/app.js?v=18"></script>
 </body>
 </html>

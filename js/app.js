@@ -9,6 +9,7 @@ function show(view){
   ["v-login","v-wizard","v-home"].forEach(v=>$(v).classList.toggle("hidden", v!=="v-"+view));
   $("logoutBtn").classList.toggle("hidden", view==="login");
   $("settingsBtn").classList.toggle("hidden", view!=="home");
+  $("helpBtn").classList.toggle("hidden", view!=="home");
 }
 function msg(el, text, kind){ el.textContent = text||""; el.className = "msg" + (text ? " "+(kind||"err") : ""); }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
@@ -35,7 +36,7 @@ function init(){
     if(!u){ PROFILE = null; applyLogo(); if(typeof stopBoardSync==="function") stopBoardSync(); show("login"); return; }
     await loadData();
     if(PROFILE && PROFILE.lang && I18N[PROFILE.lang]) setLang(PROFILE.lang);
-    if(!PROFILE || !PROFILE.setupDone){ wzStart(1); } else { renderHome(); show("home"); startBoardSync(); }
+    if(!PROFILE || !PROFILE.setupDone){ wzStart(1); } else { renderHome(); show("home"); startBoardSync(); if(typeof maybeShowWelcome==="function") maybeShowWelcome(); }
   });
 }
 
@@ -116,7 +117,7 @@ async function skipImport(){ await finishSetup(); }
 async function finishSetup(){
   await uref("profile").update({setupDone:true});
   PROFILE = Object.assign({}, PROFILE, {setupDone:true});
-  await loadData(); renderHome(); show("home"); startBoardSync();
+  await loadData(); renderHome(); show("home"); startBoardSync(); if(typeof maybeShowWelcome==="function") maybeShowWelcome();
 }
 
 /* ---------- Archivo ---------- */
@@ -212,9 +213,11 @@ function renderHome(){
   const counts = {};
   Object.values(STUDENTS).forEach(s=>{ counts[s.cls] = (counts[s.cls]||0)+1; });
   const names = Object.keys(counts).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
-  $("hmClasses").innerHTML = names.map(n=>'<div class="cls"><b>'+esc(n)+'</b><span class="muted small">'+counts[n]+' '+esc(t("home_students"))+'</span></div>').join("");
+  $("hmClasses").innerHTML = names.map(n=>'<div class="cls" data-cls="'+esc(n)+'" style="cursor:pointer"><b>'+esc(n)+'</b><span class="muted small">'+counts[n]+' '+esc(t("home_students"))+'</span></div>').join("");
   $("hmEmpty").classList.toggle("hidden", names.length>0);
   $("clsList").innerHTML = names.map(n=>'<option value="'+esc(n)+'">').join("");
+  $("hmClasses").querySelectorAll(".cls").forEach(el=>el.addEventListener("click",()=>rosterOpen(el.dataset.cls)));
+  if(typeof renderRoster==="function") renderRoster();
 }
 async function addStudent(){
   const name = Importer.clean($("adName").value), cls = Importer.clean($("adCls").value);

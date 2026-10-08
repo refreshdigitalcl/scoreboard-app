@@ -50,3 +50,15 @@ a.link{color:#22d3ee;cursor:pointer;text-decoration:underline;font-size:14px}
 .logo img,.logo-prev img{width:100%;height:100%;object-fit:contain;display:block}
 .logo-row{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
 .logo-prev{width:84px;height:84px;border-radius:18px;border:1px dashed var(--line);background:#14122c;display:grid;place-items:center;font-size:34px;overflow:hidden;padding:6px}
+.cls.on{border-color:#22d3ee;background:#22d3ee18;box-shadow:0 0 0 2px #22d3ee55}
+.roster-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0 10px}
+.roster-list{margin-top:10px;max-height:420px;overflow:auto;display:flex;flex-direction:column;gap:6px}
+.roster-row{display:flex;align-items:center;gap:8px;background:#100e24;border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+.roster-name{flex:1;min-width:0;overflow-wrap:anywhere}
+.roster-row .btn{padding:7px 10px}
+.welcome-modal{max-width:760px}
+.wl-head{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+.wl-logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#22d3ee);display:grid;place-items:center;font-size:26px}
+.wl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.wl-item{display:flex;gap:12px;background:#100e24;border:1px solid var(--line);border-radius:14px;padding:12px}
+.wl-emoji{font-size:26px;line-height:1}
